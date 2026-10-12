@@ -99,6 +99,8 @@ public class AdminAuthController {
 		model.addAttribute("pageTitle", "관리자 로그인");
 		model.addAttribute("loginRequest", loginRequest);
 		model.addAttribute("usernameError", loginRequest.getUsernameError());
+		model.addAttribute("hasUsernameError", !loginRequest.getUsernameError().isEmpty());
 		model.addAttribute("passwordError", loginRequest.getPasswordError());
+		model.addAttribute("hasPasswordError", !loginRequest.getPasswordError().isEmpty());
 	}
 }

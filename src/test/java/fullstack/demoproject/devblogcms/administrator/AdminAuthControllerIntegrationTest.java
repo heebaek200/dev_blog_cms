@@ -37,7 +37,10 @@ class AdminAuthControllerIntegrationTest {
 		mockMvc.perform(get("/admin/login"))
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/login"))
-				.andExpect(content().string(org.hamcrest.Matchers.containsString("관리자 로그인")));
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("관리자 로그인")))
+				.andExpect(content().string(org.hamcrest.Matchers.not(
+						org.hamcrest.Matchers.containsString("is-invalid")
+				)));
 	}
 
 	@Test
@@ -90,7 +93,8 @@ class AdminAuthControllerIntegrationTest {
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/login"))
 				.andExpect(model().attribute("usernameError", "아이디를 입력해 주세요."))
-				.andExpect(model().attribute("passwordError", "비밀번호를 입력해 주세요."));
+				.andExpect(model().attribute("passwordError", "비밀번호를 입력해 주세요."))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("is-invalid")));
 	}
 
 	@Test

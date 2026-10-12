@@ -52,7 +52,10 @@ class AdminTaxonomyControllerIntegrationTest {
 		mockMvc.perform(get("/admin/taxonomies").session(authenticatedSession()))
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/taxonomies"))
-				.andExpect(content().string(org.hamcrest.Matchers.containsString("카테고리·태그 관리")));
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("카테고리·태그 관리")))
+				.andExpect(content().string(org.hamcrest.Matchers.not(
+						org.hamcrest.Matchers.containsString("is-invalid")
+				)));
 	}
 
 	@Test
@@ -63,7 +66,8 @@ class AdminTaxonomyControllerIntegrationTest {
 					.param("name", "   "))
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/taxonomies"))
-				.andExpect(model().attribute("categoryNameError", "이름을 입력해 주세요."));
+				.andExpect(model().attribute("categoryNameError", "이름을 입력해 주세요."))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("is-invalid")));
 
 		assertThat(categoryRepository.count()).isZero();
 	}
