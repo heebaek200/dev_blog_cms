@@ -135,7 +135,9 @@ public class AdminTaxonomyController {
 		model.addAttribute("tags", management.tags());
 		model.addAttribute("categoryRequest", categoryRequest);
 		model.addAttribute("categoryNameError", categoryRequest.getNameError());
+		model.addAttribute("hasCategoryNameError", !categoryRequest.getNameError().isEmpty());
 		model.addAttribute("tagRequest", tagRequest);
 		model.addAttribute("tagNameError", tagRequest.getNameError());
+		model.addAttribute("hasTagNameError", !tagRequest.getNameError().isEmpty());
 	}
 }
