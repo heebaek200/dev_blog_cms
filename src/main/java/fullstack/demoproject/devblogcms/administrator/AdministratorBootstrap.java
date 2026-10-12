@@ -45,7 +45,7 @@ public class AdministratorBootstrap implements ApplicationRunner {
 		try {
 			Administrator administrator = Administrator.create(username, passwordEncoder.encode(password));
 			administratorRepository.save(administrator);
-			log.info("Initial administrator account created.");
+			log.info("최초 관리자 계정을 생성했습니다.");
 		} catch (IllegalArgumentException exception) {
 			throw new IllegalStateException("최초 관리자 환경변수 형식이 올바르지 않습니다.", exception);
 		}

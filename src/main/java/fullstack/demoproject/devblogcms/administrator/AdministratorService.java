@@ -36,7 +36,7 @@ public class AdministratorService {
 		Optional<Administrator> administrator = administratorRepository.findByUsername(normalizedUsername);
 		if (administrator.isEmpty()
 				|| !passwordEncoder.matches(rawPassword, administrator.get().getPasswordHash())) {
-			log.warn("Administrator login rejected.");
+			log.warn("관리자 로그인을 거부했습니다.");
 			return Optional.empty();
 		}
 

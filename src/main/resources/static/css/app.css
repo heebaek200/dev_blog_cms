@@ -94,6 +94,17 @@ body {
     box-shadow: 0 0.5rem 2rem rgb(48 40 36 / 8%);
 }
 
+/* 분류 관리의 두 영역을 같은 높이의 카드로 구분한다. */
+.taxonomy-panel {
+    background: var(--app-surface);
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 2rem rgb(48 40 36 / 8%);
+}
+
+.taxonomy-panel .list-group-item {
+    background: transparent;
+}
+
 /* 모바일에서는 오류 카드의 여백을 줄여 작은 화면에서도 주요 동작을 바로 보이게 한다. */
 @media (max-width: 575.98px) {
     .error-panel {

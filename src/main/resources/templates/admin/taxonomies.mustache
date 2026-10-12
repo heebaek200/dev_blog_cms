@@ -1,0 +1,91 @@
+{{>layout/header}}
+<nav class="d-flex flex-wrap align-items-center gap-3 mb-4" aria-label="관리자 메뉴">
+    <a class="btn btn-sm btn-outline-secondary" href="/admin/posts">게시글 관리</a>
+    <a class="btn btn-sm app-btn-primary" href="/admin/taxonomies" aria-current="page">카테고리·태그</a>
+    <form class="ms-auto" action="/admin/logout" method="post">
+        <button class="btn btn-sm btn-outline-secondary" type="submit">로그아웃</button>
+    </form>
+</nav>
+
+<header class="mb-4">
+    <p class="text-uppercase small fw-semibold mb-2 text-secondary">Taxonomy</p>
+    <h1 class="h2 mb-2">카테고리·태그 관리</h1>
+    <p class="text-secondary mb-0">게시글에 사용할 분류를 추가하고 사용하지 않는 항목을 삭제합니다.</p>
+</header>
+
+{{>components/messages}}
+
+<div class="row g-4">
+    <section class="col-lg-6" aria-labelledby="category-title">
+        <div class="taxonomy-panel p-4 h-100">
+            <h2 id="category-title" class="h4">카테고리</h2>
+            <p class="text-secondary">게시글 하나에 최대 하나를 지정합니다.</p>
+            <form action="/admin/categories" method="post" novalidate>
+                <div class="input-group{{#categoryNameError}} has-validation{{/categoryNameError}}">
+                    <input class="form-control{{#categoryNameError}} is-invalid{{/categoryNameError}}"
+                           name="name"
+                           value="{{categoryRequest.name}}"
+                           aria-label="새 카테고리 이름"
+                           aria-describedby="category-name-error"
+                           maxlength="50"
+                           required>
+                    <button class="btn app-btn-primary" type="submit">추가</button>
+                    {{#categoryNameError}}
+                    <div class="invalid-feedback" id="category-name-error">{{categoryNameError}}</div>
+                    {{/categoryNameError}}
+                </div>
+            </form>
+
+            <ul class="list-group list-group-flush mt-4">
+                {{#categories}}
+                <li class="list-group-item px-0 d-flex justify-content-between align-items-center gap-3">
+                    <span>{{name}} <small class="text-secondary">{{postCount}}개 글</small></span>
+                    <form action="/admin/categories/{{id}}/delete" method="post">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">삭제</button>
+                    </form>
+                </li>
+                {{/categories}}
+                {{^categories}}
+                <li class="list-group-item px-0 text-secondary">등록된 카테고리가 없습니다.</li>
+                {{/categories}}
+            </ul>
+        </div>
+    </section>
+
+    <section class="col-lg-6" aria-labelledby="tag-title">
+        <div class="taxonomy-panel p-4 h-100">
+            <h2 id="tag-title" class="h4">태그</h2>
+            <p class="text-secondary">게시글 하나에 최대 다섯 개를 지정합니다.</p>
+            <form action="/admin/tags" method="post" novalidate>
+                <div class="input-group{{#tagNameError}} has-validation{{/tagNameError}}">
+                    <input class="form-control{{#tagNameError}} is-invalid{{/tagNameError}}"
+                           name="name"
+                           value="{{tagRequest.name}}"
+                           aria-label="새 태그 이름"
+                           aria-describedby="tag-name-error"
+                           maxlength="50"
+                           required>
+                    <button class="btn app-btn-primary" type="submit">추가</button>
+                    {{#tagNameError}}
+                    <div class="invalid-feedback" id="tag-name-error">{{tagNameError}}</div>
+                    {{/tagNameError}}
+                </div>
+            </form>
+
+            <ul class="list-group list-group-flush mt-4">
+                {{#tags}}
+                <li class="list-group-item px-0 d-flex justify-content-between align-items-center gap-3">
+                    <span>#{{name}} <small class="text-secondary">{{postCount}}개 글</small></span>
+                    <form action="/admin/tags/{{id}}/delete" method="post">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">삭제</button>
+                    </form>
+                </li>
+                {{/tags}}
+                {{^tags}}
+                <li class="list-group-item px-0 text-secondary">등록된 태그가 없습니다.</li>
+                {{/tags}}
+            </ul>
+        </div>
+    </section>
+</div>
+{{>layout/footer}}
