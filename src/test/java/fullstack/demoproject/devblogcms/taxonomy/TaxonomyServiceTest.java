@@ -43,9 +43,11 @@ class TaxonomyServiceTest {
 		taxonomyService.createTag(" JPA ");
 
 		assertThatThrownBy(() -> taxonomyService.createCategory("spring"))
-				.isInstanceOf(DuplicateTaxonomyException.class);
+				.isInstanceOf(DuplicateTaxonomyException.class)
+				.hasMessage("같은 이름의 카테고리가 이미 존재합니다.");
 		assertThatThrownBy(() -> taxonomyService.createTag("  jpa  "))
-				.isInstanceOf(DuplicateTaxonomyException.class);
+				.isInstanceOf(DuplicateTaxonomyException.class)
+				.hasMessage("같은 이름의 태그가 이미 존재합니다.");
 	}
 
 	@Test

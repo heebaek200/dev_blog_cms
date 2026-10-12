@@ -93,7 +93,7 @@ class AdminTaxonomyControllerIntegrationTest {
 				.andExpect(redirectedUrl("/admin/taxonomies"))
 				.andExpect(flash().attribute(
 						"errorMessage",
-						"같은 이름의 카테고리 또는 태그가 이미 존재합니다."
+						"같은 이름의 태그가 이미 존재합니다."
 				));
 	}
 

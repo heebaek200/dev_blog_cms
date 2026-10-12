@@ -61,7 +61,7 @@ public class TaxonomyService {
 		Category category = Category.create(name);
 		if (categoryRepository.existsByNormalizedName(category.getNormalizedName())) {
 			log.warn("중복된 카테고리 생성을 거부했습니다.");
-			throw new DuplicateTaxonomyException();
+			throw DuplicateTaxonomyException.forCategory();
 		}
 
 		try {
@@ -69,7 +69,7 @@ public class TaxonomyService {
 			log.info("카테고리를 생성했습니다. 카테고리 ID={}", savedCategory.getId());
 		} catch (DataIntegrityViolationException exception) {
 			log.warn("데이터베이스 제약조건에 따라 중복된 카테고리 생성을 거부했습니다.");
-			throw new DuplicateTaxonomyException();
+			throw DuplicateTaxonomyException.forCategory();
 		}
 	}
 
@@ -84,7 +84,7 @@ public class TaxonomyService {
 		Tag tag = Tag.create(name);
 		if (tagRepository.existsByNormalizedName(tag.getNormalizedName())) {
 			log.warn("중복된 태그 생성을 거부했습니다.");
-			throw new DuplicateTaxonomyException();
+			throw DuplicateTaxonomyException.forTag();
 		}
 
 		try {
@@ -92,7 +92,7 @@ public class TaxonomyService {
 			log.info("태그를 생성했습니다. 태그 ID={}", savedTag.getId());
 		} catch (DataIntegrityViolationException exception) {
 			log.warn("데이터베이스 제약조건에 따라 중복된 태그 생성을 거부했습니다.");
-			throw new DuplicateTaxonomyException();
+			throw DuplicateTaxonomyException.forTag();
 		}
 	}
 

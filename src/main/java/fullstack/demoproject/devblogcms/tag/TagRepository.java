@@ -19,7 +19,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     @Query("""
             SELECT t.id AS id
                  , t.name AS name
-                 , COUNT(pt.id) AS postCount
+                 , COUNT(pt.post.id) AS postCount
               FROM Tag t
               LEFT JOIN PostTag pt ON pt.tag = t
              GROUP BY t.id, t.name
@@ -42,7 +42,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
      * @return 태그를 사용하는 게시글 수
      */
     @Query("""
-            SELECT COUNT(pt.id)
+            SELECT COUNT(pt.post.id)
               FROM PostTag pt
              WHERE pt.tag.id = :tagId
             """)
