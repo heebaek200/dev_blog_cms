@@ -12,6 +12,4 @@ title: 개인 기술 블로그 CMS
 - [REST API 설계서](api-design.md)
 - [코드 컨벤션](convention.md)
 - [설계 결정 기록](decision-log.md)
-- [공통 기반 실행 계약](common-foundation.yaml)
-- [참조 프로젝트 분석](reference-analysis.md)
 

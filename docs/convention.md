@@ -78,6 +78,13 @@
 - Test Method는 `메서드_조건_기대결과` 형식과 사용자 관점의 `@DisplayName`을 사용한다.
 - Test에서도 직접 콘솔 출력을 사용하지 않는다.
 
+## 외부 공개 기록
+
+- Commit 메시지, Issue·Pull Request 본문과 Comment, 일반 설계 문서는 외부 개발자가 이해할 수 있는 작업 목적과 결과로 작성한다.
+- 내부 자동화 명칭이나 내부 실행 상태 표현을 외부 공개 기록에 직접 노출하지 않는다.
+- `common-foundation.yaml`, `reference-analysis.md`와 화면에 표시되지 않는 식별 주석은 내부 실행 자료로 취급한다.
+- 내부 실행 자료는 `docs/index.md`에서 링크하지 않는다.
+
 ## JPA
 
 - 단순 CRUD와 파생 조회는 `JpaRepository`를 사용한다.
