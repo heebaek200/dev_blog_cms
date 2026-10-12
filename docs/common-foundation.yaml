@@ -1,0 +1,858 @@
+schema: 2
+status: ready
+
+project:
+  logicalName: 개인 기술 블로그 CMS
+  physicalName: devblogcms
+  purpose: 하루 안에 스프링 부트 프로젝트를 설계부터 실행 가능한 상태까지 완성해 보는 과제
+  targetUsers:
+    - public-visitor
+    - single-administrator
+
+references:
+  repositories:
+    - url: https://github.com/heebaek200/spring_blog
+      branch: main
+      commit: 3b5e0b3775029e4a4954d0fc2fec07f7c28ee390
+      purpose: 수업 기술과 하루 안에 가능한 개선 범위를 확인한다.
+      analyzedAt: 2026-10-12T10:06:32+09:00
+      access: success
+  implementationLevel: course-compatible-spring-mvc-jpa
+  observedPatterns:
+    - Spring MVC와 Mustache 기반 서버 렌더링
+    - Session과 HandlerInterceptor 기반 인증
+    - 도메인 중심 Package와 _core 공통 Package
+    - Controller, Service와 JpaRepository 계층
+    - JPA 지연 로딩과 Fetch Join
+    - 상태별 사용자 정의 Exception과 오류 화면
+  comparisons:
+    - key: reference.implementation-strategy
+      observed: 참조 프로젝트의 Spring MVC, Mustache, JPA와 Session 구조를 그대로 유지한다.
+      improved: 기존 구조를 유지하면서 범위를 통제하고 보안, 검증, 예외와 핵심 Test의 결함을 개선한다.
+      modern: Spring Security, Bean Validation, Database Migration과 더 넓은 통합 Test를 도입한다.
+      recommendation: 하루 완성 제약과 완성도 목표를 함께 만족하기 위해 개선 방식을 권장한다.
+      selected: improved
+      selectionState: confirmed
+
+architecture:
+  rendering: server-side-mustache
+  restApi: false
+  packageStructure: domain-centered
+
+environment:
+  javaVersion: 21
+  springBootVersion: 4.1.1
+  profiles:
+    - name: local
+      database: h2-memory
+      ddlAuto: create
+      default: true
+    - name: dev
+      database: mysql
+      ddlAuto: update
+    - name: test
+      database: h2
+      ddlAuto: create-drop
+  variables:
+    - name: SPRING_PROFILES_ACTIVE
+      required: false
+      default: local
+      secret: false
+    - name: DEV_DB_URL
+      requiredFor:
+        - dev
+      secret: false
+    - name: DEV_DB_USERNAME
+      requiredFor:
+        - dev
+      secret: true
+    - name: DEV_DB_PASSWORD
+      requiredFor:
+        - dev
+      secret: true
+    - name: INITIAL_ADMIN_USERNAME
+      requiredWhen: administrator-missing
+      secret: true
+    - name: INITIAL_ADMIN_PASSWORD
+      requiredWhen: administrator-missing
+      secret: true
+
+database:
+  enabled: true
+  engine: h2-local-test-mysql-dev
+  tableNaming: singular-snake-case-without-tb-suffix
+  columnNaming: snake-case
+  primaryKeyNaming: table-name-id
+  foreignKeyNaming: referenced-primary-key-name
+  softDelete: false
+  auditColumns:
+    - created_at
+    - updated_at
+  snapshotPolicy: none
+  dateTimePolicy: local-date-time-asia-seoul
+  statusPolicy: varchar-enum-name
+  profileInitialization:
+    dataSql: false
+    h2ConsoleProfiles:
+      - local
+    applicationLogLevelOverride: false
+
+persistence:
+  type: jpa
+  usePersistenceContext: dirty-checking-for-managed-updates
+  entityManagerDirectUse: false
+  springDataRepository: true
+  loading: lazy
+  relationship:
+    postCategory:
+      owner: post
+      cascade: none
+    postTag:
+      model: explicit-entity-with-embedded-id-and-maps-id
+      owner: post-tag
+      postCascade: all-with-orphan-removal
+      tagCascade: none
+  nPlusOne:
+    targets:
+      - public-post-list
+      - public-post-detail
+    solutions:
+      - jpql-fetch-join
+      - entity-graph
+  complexQueryStrategy:
+    - jpa-repository-method
+    - jpql-query
+    - custom-repository
+  nativeSql: false
+  mybatis: false
+
+java:
+  naming:
+    classAndNestedType: PascalCase
+    methodFieldParameterLocal: camelCase
+    constant: UPPER_SNAKE_CASE
+    entity: singular-noun
+    repository: EntityRepository
+    service: DomainService
+    requestDto: DomainRequest.NestedAction
+    responseDto: DomainResponse.NestedView
+  controllerNaming:
+    publicPost: PostController
+    administratorAuthentication: AdminAuthController
+    administratorPost: AdminPostController
+    administratorTaxonomy: AdminTaxonomyController
+    apiControllerSuffix: not-applicable
+  layers:
+    - controller
+    - service
+    - repository
+  layerDependencies:
+    - controller-to-service
+    - service-to-repository
+  commonPackages:
+    - _core.config
+    - _core.entity
+    - _core.exception
+    - _core.interceptor
+  optionalCommonPackages:
+    - name: _core.util
+      createWhen: shared-stateless-utility-exists
+  layerResponsibilities:
+    controller:
+      - request-binding-and-validation-result
+      - service-invocation
+      - model-and-redirect
+    service:
+      - use-case-orchestration
+      - business-rules
+      - transaction-boundary
+      - multi-domain-repository-access
+    repository:
+      - entity-persistence-and-query
+    forbidden:
+      - controller-to-repository
+      - service-to-service
+      - cyclic-dependency
+  documentation:
+    javadoc:
+      required: true
+      minimumDescriptionLines: 1
+      exclusions:
+        - generated-method
+        - trivial-getter-setter
+        - self-explanatory-override
+        - test-method
+  logging:
+    levels:
+      - ERROR
+      - WARN
+      - INFO
+      - DEBUG
+    configureApplicationLevel: false
+    removeTemporaryDebugBeforePullRequest: true
+    framework: slf4j-with-lombok-slf4j
+    rules:
+      ERROR: unexpected-system-failure
+      WARN: authentication-rejection-and-business-conflict
+      INFO: administrator-bootstrap-and-major-admin-mutation
+      DEBUG: development-diagnostics-only
+    forbiddenData:
+      - password
+      - session-id
+      - personal-data
+    forbiddenOutput:
+      - system-out
+      - system-err
+      - direct-stack-trace
+  requestChecks:
+    strategy: centralized-administrator-session-authentication
+    mechanism: handler-interceptor
+    includePatterns:
+      - /admin/**
+    excludePatterns:
+      - /admin/login
+      - /css/**
+      - /error
+      - /favicon.ico
+    failureHandling: redirect-to-admin-login
+    order:
+      - session-authentication
+      - dto-binding-and-bean-validation
+      - controller
+      - service-domain-validation
+  session:
+    keyConstant: Define.SESSION_ADMIN
+    keyValue: sessionAdmin
+    valueType: AdministratorSession
+    fields:
+      - administratorId
+      - username
+    storeJpaEntity: false
+    lookupWithoutCreation: true
+    logout: invalidate-session
+  transactionPolicy:
+    boundary: service-public-use-case
+    read: read-only
+    write: read-write
+
+convention:
+  audience: experienced-solo-developer
+  ruleFormat: rules-only
+  ruleSelection: project-specific-and-defect-preventing-only
+
+validation:
+  dto:
+    framework: jakarta-bean-validation
+    controllerHandling: valid-with-binding-result
+    rules:
+      postTitle: trimmed-required-max-200
+      postContent: trimmed-required
+      categoryId: optional
+      tagIds: unique-set-max-5
+      taxonomyName: trimmed-required-max-50
+      loginUsername: required
+      loginPassword: required
+    invalidResult: redisplay-form-with-input-and-field-errors
+  domain:
+    entity:
+      - post-state-transition
+      - simple-self-invariants
+    service:
+      - maximum-five-tags-per-post
+      - normalized-taxonomy-name-uniqueness
+      - reject-in-use-taxonomy-deletion
+
+exceptions:
+  customExceptions: status-and-business-specific-runtime-exceptions
+  hierarchy:
+    - name: Exception401
+      parent: RuntimeException
+      use: missing-administrator-session
+    - name: Exception404
+      parent: RuntimeException
+      use: missing-or-hidden-resource
+    - name: Exception500
+      parent: RuntimeException
+      use: explicit-internal-failure
+    - name: DuplicateTaxonomyException
+      parent: RuntimeException
+      use: duplicate-normalized-taxonomy-name
+    - name: TaxonomyInUseException
+      parent: RuntimeException
+      use: delete-in-use-taxonomy
+    - name: InvalidPostStateException
+      parent: RuntimeException
+      use: invalid-post-state-transition
+  commonHandler: controller-advice
+  unmappedRoute: spring-boot-error-mapping-with-error-404-template
+  rules:
+    - exception-401-redirects-admin-login-with-generic-flash-message
+    - exception-404-returns-http-404-error-view
+    - exception-500-and-unhandled-runtime-return-safe-http-500-view
+    - taxonomy-conflicts-redirect-admin-taxonomies-with-flash-message
+    - invalid-post-state-redirects-admin-posts-with-flash-message
+    - internal-details-never-exposed
+    - javascript-error-response-forbidden
+
+security:
+  administratorBootstrap:
+    trigger: application-startup-when-administrator-missing
+    usernameVariable: INITIAL_ADMIN_USERNAME
+    passwordVariable: INITIAL_ADMIN_PASSWORD
+    missingVariables: fail-startup-with-clear-error
+    testCredentials: test-only-values
+  password:
+    dependency: spring-security-crypto
+    encoder: bcrypt
+    fullSpringSecurity: false
+    plaintextPersistence: false
+    plaintextLogging: false
+
+web:
+  cssFramework: bootstrap
+  cssFrameworkVersion: 5.3.3
+  cssDelivery: cdn
+  customCssPolicy: minimal-local-app-css
+  designStyle: minimal
+  primaryColor: '#EFA66F'
+  responsive: mobile-to-desktop
+  routes:
+    public:
+      - method: GET
+        path: /
+        purpose: published-post-list
+      - method: GET
+        path: /posts/{postId}
+        purpose: published-post-detail
+      - method: GET
+        path: /categories/{categoryId}
+        purpose: published-post-list-by-category
+      - method: GET
+        path: /tags/{tagId}
+        purpose: published-post-list-by-tag
+    administrator:
+      - method: GET
+        path: /admin/login
+        purpose: login-form
+      - method: POST
+        path: /admin/login
+        purpose: login
+      - method: POST
+        path: /admin/logout
+        purpose: logout
+      - method: GET
+        path: /admin/posts
+        purpose: post-management-list
+      - method: GET
+        path: /admin/posts/new
+        purpose: post-create-form
+      - method: POST
+        path: /admin/posts
+        purpose: post-create
+      - method: GET
+        path: /admin/posts/{postId}/edit
+        purpose: post-edit-form
+      - method: POST
+        path: /admin/posts/{postId}/edit
+        purpose: post-update
+      - method: POST
+        path: /admin/posts/{postId}/delete
+        purpose: post-delete
+      - method: POST
+        path: /admin/posts/{postId}/publish
+        purpose: post-publish
+      - method: POST
+        path: /admin/posts/{postId}/draft
+        purpose: post-unpublish
+      - method: GET
+        path: /admin/taxonomies
+        purpose: category-and-tag-management
+      - method: POST
+        path: /admin/categories
+        purpose: category-create
+      - method: POST
+        path: /admin/categories/{categoryId}/delete
+        purpose: category-delete
+      - method: POST
+        path: /admin/tags
+        purpose: tag-create
+      - method: POST
+        path: /admin/tags/{tagId}/delete
+        purpose: tag-delete
+  errorPages:
+    - status: 404
+      purpose: resource-not-found
+    - status: 500
+      purpose: unexpected-server-error
+  states:
+    publicPostList:
+      - default
+      - empty
+      - filter-empty
+    publicPostDetail:
+      - default
+      - not-found
+    administratorLogin:
+      - default
+      - credential-error
+    administratorPostList:
+      - default
+      - empty
+      - success-message
+    administratorPostForm:
+      - create
+      - edit
+      - validation-error
+    administratorTaxonomy:
+      - default
+      - duplicate-name-error
+      - in-use-delete-error
+  wireframes:
+    enabled: true
+    directory: docs/design/wireframes
+    sharedStylesheet: wireframe.css
+    files:
+      - public-post-list.html
+      - public-post-detail.html
+      - admin-login.html
+      - admin-post-list.html
+      - admin-post-form.html
+      - admin-taxonomy.html
+      - error-404.html
+
+mustache:
+  enabled: true
+  commonTemplates:
+    - header
+    - footer
+  commonComponents:
+    - success-message-box
+    - warning-message-box
+    - error-message-box
+
+implementation:
+  spearTargets:
+    web.css-framework-setup:
+      status: included
+      sourceDecisions:
+        - screen.css-framework
+        - screen.css-delivery
+        - screen.custom-css-policy
+      summary: Bootstrap 5.3.3 CDN과 최소 app.css를 공통 Layout에 연결한다.
+      acceptance:
+        - 공개 화면과 관리자 화면이 같은 Bootstrap 및 app.css 연결을 사용한다.
+        - 확정한 파스텔 주황 Palette와 반응형 정책이 적용된다.
+      dependencies: []
+    template.common-components:
+      status: included
+      sourceDecisions:
+        - screen.layout
+        - template.common-components
+      summary: Header, Footer와 상태별 Message Box를 Mustache 공통 Component로 구성한다.
+      acceptance:
+        - 두 개 이상의 화면이 같은 Header와 Footer를 사용한다.
+        - 성공, 경고와 오류 Message Box가 공통 Component로 표시된다.
+      dependencies:
+        - web.css-framework-setup
+    web.error-pages:
+      status: included
+      sourceDecisions:
+        - screen.error-pages
+      summary: 공통 오류 Layout으로 404와 500 화면을 제공한다.
+      acceptance:
+        - 존재하지 않거나 공개되지 않은 자원은 404 화면으로 응답한다.
+        - 예상하지 못한 서버 오류는 내부 정보를 노출하지 않는 500 화면으로 응답한다.
+        - 두 오류 화면에서 공개 게시글 목록으로 이동할 수 있다.
+      dependencies:
+        - web.css-framework-setup
+        - template.common-components
+    java.common-package:
+      status: included
+      sourceDecisions:
+        - java.common-package
+        - database.audit.automation
+      summary: 확정된 `_core` 하위 Package와 JPA 공통 시간 Entity 기반을 구성한다.
+      acceptance:
+        - config, entity, exception과 interceptor Package가 확정된 책임에 맞게 구성된다.
+        - 공통 생성·수정 시각 기반이 Spring Data JPA Auditing을 사용한다.
+        - 특정 업무 도메인 코드와 불필요한 util Package가 포함되지 않는다.
+      dependencies: []
+    security.request-guard:
+      status: included
+      sourceDecisions:
+        - security.request-check.strategy
+        - security.request-check.mechanism
+        - security.request-check.patterns
+        - security.request-check.failure
+        - security.request-check.order
+      summary: 관리자 Session 인증을 HandlerInterceptor로 공통 처리한다.
+      acceptance:
+        - 비인증 요청은 모든 보호 대상 관리자 경로에서 로그인 화면으로 Redirect된다.
+        - 로그인, 공개 화면, 정적 리소스와 오류 경로는 관리자 인증 검사 대상이 아니다.
+        - DTO 입력 검증은 Spring Binding과 Bean Validation이 담당한다.
+      dependencies:
+        - java.common-package
+        - java.exception-hierarchy
+    java.exception-hierarchy:
+      status: included
+      sourceDecisions:
+        - java.exceptions.custom
+        - java.exceptions.hierarchy
+      summary: 참조 호환 상태별 예외와 의미 있는 업무 충돌 예외를 구성한다.
+      acceptance:
+        - 인증, 미존재 자원, 내부 오류와 업무 충돌이 확정된 예외 Type으로 구분된다.
+        - 각 예외의 생성 조건과 사용자 노출 가능 메시지가 구분된다.
+      dependencies:
+        - java.common-package
+    java.exception-handler:
+      status: included
+      sourceDecisions:
+        - java.exceptions.handler
+        - java.exceptions.unmapped-route
+      summary: ControllerAdvice와 Spring Boot 오류 Mapping으로 화면 오류 흐름을 통합한다.
+      acceptance:
+        - 401은 로그인 Redirect, 404와 500은 확정된 오류 화면으로 처리된다.
+        - 업무 충돌은 해당 관리 화면으로 Redirect되어 Flash Message로 표시된다.
+        - 존재하지 않는 Route가 404 화면으로 처리되고 내부 정보는 노출되지 않는다.
+      dependencies:
+        - java.exception-hierarchy
+        - web.error-pages
+    environment.profile-configuration:
+      status: included
+      sourceDecisions:
+        - foundation.environment
+      summary: Java 21과 local·dev·test Profile 및 환경변수 계약을 설정에 반영한다.
+      acceptance:
+        - 기본 local, MySQL dev와 H2 test Profile이 확정된 DDL 정책으로 동작한다.
+        - `.env.example`에 실제 값 없이 필요한 환경변수 이름이 안내된다.
+        - 애플리케이션 Package DEBUG Level Override가 제거된다.
+      dependencies: []
+    database.profile-configuration:
+      status: included
+      sourceDecisions:
+        - foundation.database
+      summary: Profile별 Database, Schema 초기화와 H2 Console 범위를 구성한다.
+      acceptance:
+        - local은 H2 create, dev는 MySQL update, test는 H2 create-drop을 사용한다.
+        - H2 Console은 local에서만 활성화된다.
+        - data.sql로 관리자 또는 업무 데이터를 만들지 않는다.
+      dependencies:
+        - environment.profile-configuration
+    security.admin-bootstrap:
+      status: included
+      sourceDecisions:
+        - foundation.security
+        - security.admin-bootstrap
+      summary: 관리자가 없을 때 환경변수와 BCrypt로 최초 관리자 한 명을 생성한다.
+      acceptance:
+        - 관리자가 이미 있으면 추가 계정을 만들지 않는다.
+        - 관리자가 없고 초기 자격 증명이 없으면 명확한 오류로 시작에 실패한다.
+        - 평문 비밀번호가 Database, Source와 Log에 저장되지 않는다.
+        - Test는 실제 비밀정보가 아닌 Test 전용 값을 사용한다.
+      dependencies:
+        - environment.profile-configuration
+        - database.profile-configuration
+        - java.common-package
+    java.validation-setup:
+      status: included
+      sourceDecisions:
+        - java.validation.dto
+        - java.validation.domain
+      summary: Jakarta Bean Validation 의존성과 MVC Form 검증 기반을 구성한다.
+      acceptance:
+        - Form DTO에서 Jakarta Validation Annotation과 BindingResult를 사용할 수 있다.
+        - 검증 오류를 공통 Message Box와 Field Error로 표시할 기반이 준비된다.
+      dependencies:
+        - template.common-components
+
+  exclusions:
+    - administrator-login-logout-controller-and-service
+    - post-category-tag-domain-entities-and-business-services
+    - public-and-administrator-feature-controllers
+    - feature-specific-mustache-pages
+    - post-crud-and-publication-workflow
+    - category-and-tag-filter-queries
+    - search-and-pagination
+
+verification:
+  - gradle-test-passes
+  - local-profile-starts-with-temporary-initial-administrator-variables
+  - automated-tests-cover-administrator-bootstrap-admin-redirect-and-unmapped-route-404
+  - no-real-secrets-are-committed
+decisionStates:
+  project.purpose: confirmed
+  project.target-users: confirmed
+  requirements.scope: confirmed
+  requirements.priority: confirmed
+  requirements.constraints: confirmed
+  requirements.out-of-scope: confirmed
+  requirements.done: confirmed
+  business.roles: confirmed
+  business.scenarios: confirmed
+  business.exceptions: confirmed
+  business.states: confirmed
+  business.time-rules: not_applicable
+  business.duplicates: confirmed
+  business.cancellation: not_applicable
+  business.deletion: confirmed
+  security.admin-bootstrap: confirmed
+  database.enabled: confirmed
+  database.soft-delete: confirmed
+  database.engine: confirmed
+  database.naming.table: confirmed
+  database.naming.column: confirmed
+  database.naming.primary-key: confirmed
+  database.naming.foreign-key: confirmed
+  database.audit.columns: confirmed
+  database.audit.automation: confirmed
+  database.snapshot: not_applicable
+  database.datetime: confirmed
+  database.status: confirmed
+  database.constraints: confirmed
+  database.index: confirmed
+  database.erd: confirmed
+  screen.design-style: confirmed
+  screen.colors: confirmed
+  screen.css-framework: confirmed
+  screen.css-delivery: confirmed
+  screen.custom-css-policy: confirmed
+  screen.responsive: confirmed
+  screen.layout: confirmed
+  template.common-components: confirmed
+  screen.catalog: confirmed
+  screen.wireframes: confirmed
+  screen.wireframe-path: confirmed
+  screen.wireframe-states: confirmed
+  screen.routes: confirmed
+  screen.states: confirmed
+  screen.error-pages: confirmed
+  api.boundary: not_applicable
+  api.url: not_applicable
+  api.method: not_applicable
+  api.input: not_applicable
+  api.request: not_applicable
+  api.response: not_applicable
+  api.error: not_applicable
+  api.pagination: not_applicable
+  api.authorization: not_applicable
+  api.serialization: not_applicable
+  convention.audience: confirmed
+  convention.format: confirmed
+  java.package.structure: confirmed
+  java.layers: confirmed
+  java.layer-dependencies: confirmed
+  java.layer-responsibilities: confirmed
+  java.transaction: confirmed
+  java.naming: confirmed
+  java.controller.naming: confirmed
+  java.common-package: confirmed
+  java.documentation.javadoc: confirmed
+  java.logging.policy: confirmed
+  post.summary: not_applicable
+  java.validation.dto: confirmed
+  java.validation.domain: confirmed
+  security.request-check.strategy: confirmed
+  security.request-check.mechanism: confirmed
+  security.request-check.patterns: confirmed
+  security.request-check.failure: confirmed
+  security.request-check.order: confirmed
+  java.exceptions.custom: confirmed
+  java.exceptions.hierarchy: confirmed
+  java.exceptions.handler: confirmed
+  java.exceptions.unmapped-route: confirmed
+  java.session: confirmed
+  java.testing: confirmed
+  convention.scope: confirmed
+  persistence.context: confirmed
+  persistence.entity-manager: not_applicable
+  persistence.spring-data: confirmed
+  persistence.loading: confirmed
+  persistence.relationship: confirmed
+  persistence.complex-query: confirmed
+  persistence.native-sql: not_applicable
+  persistence.mybatis: not_applicable
+  foundation.environment: confirmed
+  foundation.security: confirmed
+  foundation.database: confirmed
+  foundation.java: confirmed
+  foundation.convention: confirmed
+  foundation.template: confirmed
+  foundation.css: confirmed
+  foundation.errors: confirmed
+  foundation.verification: confirmed
+  foundation.exclusions: confirmed
+  reference.implementation-strategy: confirmed
+  reference.convention-strategy: confirmed
+  architecture.rendering: confirmed
+  persistence.type: confirmed
+  mustache.enabled: confirmed
+extensions:
+  documentation:
+    requirements: client-a-product-requirements
+    referenceAnalysis: internal-reference-analysis
+    decisionLog: design-decisions
+    foundationContract: implementation-contract
+  referenceStrategy:
+    conventionBaseline: improved-reference-project
+    retain:
+      - status-specific-runtime-exceptions
+      - controller-advice
+      - handler-interceptor
+      - session-key-constant
+      - data-jpa-test
+    reject:
+      - plaintext-password-comparison
+      - system-out
+      - javascript-error-response
+      - trivial-interceptor-overrides
+  testing:
+    repository: data-jpa-test
+    application: context-load
+    additionalCoverage:
+      - core-service-business-rules
+      - administrator-interceptor
+    classNaming: TargetTest
+    methodNaming: method-condition-expected
+    displayName: required
+    structure: given-when-then
+    assertions: assertj
+  requirements:
+    timebox: one-day
+    operatorModel: single-administrator-cms
+    mustHave:
+      - public-post-list
+      - public-post-detail
+      - administrator-login-logout
+      - administrator-post-crud
+      - draft-publish-workflow
+      - category-management
+      - tag-management
+      - basic-error-pages
+    outOfScope:
+      - public-registration
+      - multiple-authors
+      - comments
+      - likes
+      - image-file-upload
+      - full-text-search
+      - title-search
+      - pagination
+      - scheduled-publication
+      - deleted-post-recovery
+      - deployment
+    doneWhen:
+      - build-and-automated-tests-pass
+      - application-starts-locally
+      - public-reading-and-taxonomy-filtering-work
+      - administrator-authentication-and-management-work
+      - unauthenticated-management-access-is-blocked
+      - defined-error-pages-handle-major-errors
+      - no-real-secrets-are-committed
+  api:
+    enabled: false
+    transport: spring-mvc-html-form
+    successMutation: post-redirect-get
+    contractDocument: screen-design.md
+  packageStructure:
+    style: domain-centered
+    domains:
+      - administrator
+      - post
+      - category
+      - tag
+    sharedRoot: _core
+    layerFirstRootPackages: false
+  ui:
+    palette:
+      background: '#FFF8F3'
+      surface: '#FFFFFF'
+      primary: '#EFA66F'
+      primaryStrong: '#A65324'
+      primarySoft: '#FFF0E4'
+      text: '#302824'
+      mutedText: '#75665E'
+      success: '#3F7D5A'
+      warning: '#A76524'
+      danger: '#B85450'
+    excludedControls:
+      - search-input-and-button
+      - pagination-controls
+      - unsupported-feature-actions
+  business:
+    administrator:
+      cardinality: one
+      bootstrap: environment-variables
+      createOnlyWhenMissing: true
+    post:
+      states:
+        - DRAFT
+        - PUBLISHED
+      transitions:
+        - DRAFT_TO_PUBLISHED
+        - PUBLISHED_TO_DRAFT
+      deletion: physical
+      scheduledPublication: false
+      recovery: false
+      summary: false
+    category:
+      minimumPerPost: 0
+      maximumPerPost: 1
+      normalizedNameUnique: true
+      deleteWhenInUse: false
+    tag:
+      minimumPerPost: 0
+      maximumPerPost: 5
+      normalizedNameUnique: true
+      deleteWhenInUse: false
+    authentication:
+      loginSuccess: redirect-admin-post-list
+      loginFailure: generic-credential-error
+      unauthenticatedManagementAccess: redirect-login
+      logoutMethod: POST
+      logoutResult: invalidate-session-and-redirect-public-list
+    visibility:
+      publicPostStates:
+        - PUBLISHED
+      hiddenDraftAccess: not-found
+    requestHandling:
+      invalidForm: redisplay-with-errors-and-input
+      successfulMutation: post-redirect-get
+      missingResource: not-found
+      duplicateTaxonomy: reject-with-message
+      deleteTaxonomyInUse: reject-with-message
+  database:
+    profiles:
+      local: h2-memory
+      dev: mysql-environment-variables
+      test: h2
+    auditAutomation:
+      observed: hibernate-creation-timestamp
+      improved: spring-data-jpa-auditing
+      modern: database-managed-defaults-and-triggers
+      recommendation: spring-data-jpa-auditing
+      selected: spring-data-jpa-auditing
+      selectionState: confirmed
+    tables:
+      - administrator
+      - category
+      - post
+      - tag
+      - post_tag
+    constraints:
+      unique:
+        - administrator.username
+        - category.normalized_name
+        - tag.normalized_name
+        - post_tag.post_id+tag_id
+      checks:
+        - post.status=DRAFT|PUBLISHED
+      foreignKeyDeletion:
+        post.category_id: restrict
+        post_tag.post_id: cascade
+        post_tag.tag_id: restrict
+      maximumTagsPerPost: 5
+    indexes:
+      - post.status+created_at
+      - post.category_id+status+created_at
+      - post_tag.tag_id+post_id
+    erd: mermaid
