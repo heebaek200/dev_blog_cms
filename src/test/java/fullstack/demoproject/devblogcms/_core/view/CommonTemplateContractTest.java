@@ -26,7 +26,7 @@ class CommonTemplateContractTest {
 	void headerTemplate_loadsConfirmedStyles() throws IOException {
 		String headerTemplate = readResource("templates/layout/header.mustache");
 
-		assertThat(headerTemplate).contains("bootstrap@5.3.3", "/css/app.css");
+		assertThat(headerTemplate).contains("bootstrap@5.3.3", "/css/app.css", "/admin/login");
 	}
 
 	@Test
