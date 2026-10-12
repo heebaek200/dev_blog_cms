@@ -1,0 +1,121 @@
+{{>layout/header}}
+<nav class="d-flex flex-wrap align-items-center gap-3 mb-4" aria-label="관리자 메뉴">
+    <a class="btn btn-sm app-btn-primary" href="/admin/posts" aria-current="page">게시글 관리</a>
+    <a class="btn btn-sm btn-outline-secondary" href="/admin/taxonomies">카테고리·태그</a>
+    <form class="ms-auto" action="/admin/logout" method="post">
+        <button class="btn btn-sm btn-outline-secondary" type="submit">로그아웃</button>
+    </form>
+</nav>
+
+<header class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+    <div>
+        <p class="text-uppercase small fw-semibold mb-2 text-secondary">Content</p>
+        <h1 class="h2 mb-0">게시글 관리</h1>
+    </div>
+    <a class="btn app-btn-primary" href="/admin/posts/new">새 글 작성</a>
+</header>
+
+{{>components/messages}}
+
+<section class="admin-surface p-3 p-md-4" aria-label="게시글 목록">
+    {{#hasPosts}}
+    <div class="table-responsive admin-post-table">
+        <table class="table align-middle mb-0">
+            <colgroup>
+                <col class="admin-post-title-column">
+                <col class="admin-post-category-column">
+                <col class="admin-post-status-column">
+                <col class="admin-post-date-column">
+                <col class="admin-post-management-column">
+            </colgroup>
+            <thead>
+            <tr>
+                <th scope="col">제목</th>
+                <th scope="col">카테고리</th>
+                <th scope="col">상태</th>
+                <th scope="col">수정일</th>
+                <th class="text-end" scope="col">관리</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#posts}}
+            <tr>
+                <td class="fw-semibold">
+                    <span class="admin-post-title-text" title="{{title}}">{{title}}</span>
+                </td>
+                <td>{{categoryName}}</td>
+                <td>
+                    {{#published}}<span class="post-status post-status-published">공개</span>{{/published}}
+                    {{#draft}}<span class="post-status post-status-draft">초안</span>{{/draft}}
+                </td>
+                <td>{{updatedAt}}</td>
+                <td>
+                    <div class="admin-post-actions justify-content-end">
+                        {{#draft}}
+                        <form action="/admin/posts/{{id}}/publish" method="post">
+                            <button class="btn btn-sm btn-outline-success" type="submit">공개</button>
+                        </form>
+                        {{/draft}}
+                        {{#published}}
+                        <form action="/admin/posts/{{id}}/draft" method="post">
+                            <button class="btn btn-sm btn-outline-secondary" type="submit">초안 전환</button>
+                        </form>
+                        {{/published}}
+                        <a class="btn btn-sm btn-outline-primary" href="/admin/posts/{{id}}/edit">수정</a>
+                        <form action="/admin/posts/{{id}}/delete"
+                              method="post"
+                              onsubmit="return confirm('게시글을 삭제하시겠습니까? 삭제한 게시글은 복구할 수 없습니다.');">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">삭제</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {{/posts}}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="admin-post-cards">
+        {{#posts}}
+        <article class="border rounded-3 p-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                    {{#published}}<span class="post-status post-status-published">공개</span>{{/published}}
+                    {{#draft}}<span class="post-status post-status-draft">초안</span>{{/draft}}
+                </div>
+                <small class="text-secondary">{{updatedAt}}</small>
+            </div>
+            <h2 class="h5 mt-3 mb-2">{{title}}</h2>
+            <p class="small text-secondary mb-3">{{categoryName}}</p>
+            <div class="admin-post-actions">
+                {{#draft}}
+                <form action="/admin/posts/{{id}}/publish" method="post">
+                    <button class="btn btn-sm btn-outline-success" type="submit">공개</button>
+                </form>
+                {{/draft}}
+                {{#published}}
+                <form action="/admin/posts/{{id}}/draft" method="post">
+                    <button class="btn btn-sm btn-outline-secondary" type="submit">초안 전환</button>
+                </form>
+                {{/published}}
+                <a class="btn btn-sm btn-outline-primary" href="/admin/posts/{{id}}/edit">수정</a>
+                <form action="/admin/posts/{{id}}/delete"
+                      method="post"
+                      onsubmit="return confirm('게시글을 삭제하시겠습니까? 삭제한 게시글은 복구할 수 없습니다.');">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">삭제</button>
+                </form>
+            </div>
+        </article>
+        {{/posts}}
+    </div>
+    {{/hasPosts}}
+
+    {{^hasPosts}}
+    <div class="text-center py-5">
+        <h2 class="h5">아직 작성한 글이 없습니다.</h2>
+        <p class="text-secondary">첫 게시글을 초안으로 작성해 보세요.</p>
+        <a class="btn app-btn-primary" href="/admin/posts/new">첫 글 작성</a>
+    </div>
+    {{/hasPosts}}
+</section>
+{{>layout/footer}}
