@@ -1,7 +1,10 @@
 server:
+  error:
+    whitelabel:
+      enabled: false
   servlet:
     session:
-      tracking-modes: cookie    # 세션 번호를 쿠키로만 전달 (주소에 ;jsessionid를 붙이지 않음)
+      tracking-modes: cookie
 
 spring:
   config:
@@ -12,4 +15,6 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:local}
   mustache:
     servlet:
-      expose-session-attributes: true   # Mustache 파일에서 세션값 사용
+      expose-session-attributes: true
+  jpa:
+    open-in-view: false

@@ -27,7 +27,7 @@
 
 - 결정: requirements.md에는 가상 클라이언트 A씨가 요청한 제품 요구사항과 인수 기준만 기록한다. 참조 분석은 reference-analysis.md, 설계 결정은 decision-log.md, 구현 계약은 common-foundation.yaml에 분리한다.
 - 상태: confirmed
-- 근거: 요구사항과 아말라이트의 내부 분석·결정 과정을 혼합하지 않기 위해 사용자가 문서 책임을 명확히 했다.
+- 근거: 요구사항과 내부 분석·결정 과정을 혼합하지 않기 위해 사용자가 문서 책임을 명확히 했다.
 - 영향 문서: requirements.md, reference-analysis.md, decision-log.md, common-foundation.yaml
 
 ## 2026-10-12 관리자와 콘텐츠 생명주기
@@ -142,9 +142,9 @@
 - 근거: 시작 도구의 환경 구성을 유지하면서 실제 비밀정보 없이 단일 관리자 초기화를 재현 가능하게 만든다.
 - 영향 문서: database-design.md, common-foundation.yaml
 
-## 2026-10-12 스피어 공통 기반 범위
+## 2026-10-12 공통 기반 구현 범위
 
-- 결정: 환경·DB·최초 관리자·JPA Auditing·Validation·예외·인증 Guard·공통 화면과 CSS를 스피어에 포함한다. 실제 로그인과 게시글·분류 업무 기능은 제외하며 검증은 Test, local 시작, 핵심 공통 흐름과 비밀정보 확인으로 제한한다.
+- 결정: 환경·DB·최초 관리자·JPA Auditing·Validation·예외·인증 Guard·공통 화면과 CSS를 공통 기반 구현에 포함한다. 실제 로그인과 게시글·분류 업무 기능은 제외하며 검증은 Test, local 시작, 핵심 공통 흐름과 비밀정보 확인으로 제한한다.
 - 상태: confirmed
 - 근거: 업무 기능을 선행 구현하지 않으면서 이후 기능 개발이 바로 사용할 수 있는 공통 기반만 완성한다.
 - 영향 문서: common-foundation.yaml
