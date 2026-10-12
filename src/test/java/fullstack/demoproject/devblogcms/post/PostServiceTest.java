@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import fullstack.demoproject.devblogcms._core.exception.Exception404;
 import fullstack.demoproject.devblogcms._core.exception.InvalidPostStateException;
 import fullstack.demoproject.devblogcms.category.Category;
 import fullstack.demoproject.devblogcms.category.CategoryRepository;
@@ -96,14 +95,16 @@ class PostServiceTest {
 	}
 
 	@Test
-	@DisplayName("존재하지 않는 분류 ID로 게시글을 저장할 수 없다")
-	void create_missingTaxonomy_throwsNotFoundException() {
+	@DisplayName("존재하지 않는 카테고리 ID는 Field Error로 기록하고 게시글을 저장하지 않는다")
+	void create_missingCategory_returnsFieldError() {
 		PostRequest.Save request = request("잘못된 분류", "잘못된 분류 본문", Post.Status.DRAFT);
 		request.setCategoryId(999L);
 
-		assertThatThrownBy(() -> postService.create(request))
-				.isInstanceOf(Exception404.class)
-				.hasMessage("카테고리를 찾을 수 없습니다.");
+		boolean created = postService.create(request);
+
+		assertThat(created).isFalse();
+		assertThat(request.getCategoryIdError()).isEqualTo("선택한 카테고리를 찾을 수 없습니다.");
+		assertThat(postRepository.count()).isZero();
 	}
 
 	@Test

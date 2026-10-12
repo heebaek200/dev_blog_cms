@@ -69,7 +69,10 @@ public class AdminPostController {
 			return FORM_VIEW;
 		}
 
-		postService.create(postRequest);
+		if (!postService.create(postRequest)) {
+			prepareFormModel(model, postRequest, false, null);
+			return FORM_VIEW;
+		}
 		redirectAttributes.addFlashAttribute("successMessage", saveSuccessMessage(postRequest.getStatus()));
 		return LIST_REDIRECT;
 	}
@@ -110,7 +113,10 @@ public class AdminPostController {
 			return FORM_VIEW;
 		}
 
-		postService.update(postId, postRequest);
+		if (!postService.update(postId, postRequest)) {
+			prepareFormModel(model, postRequest, true, postId);
+			return FORM_VIEW;
+		}
 		redirectAttributes.addFlashAttribute("successMessage", "게시글을 수정했습니다.");
 		return LIST_REDIRECT;
 	}

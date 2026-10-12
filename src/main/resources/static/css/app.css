@@ -120,6 +120,49 @@ body {
     gap: 0.5rem;
 }
 
+/* 긴 제목이 나머지 열을 밀어내지 않도록 목록 열 너비를 고정하고 제목만 말줄임표로 줄인다. */
+.admin-post-table table {
+    min-width: 820px;
+    table-layout: fixed;
+}
+
+.admin-post-title-column {
+    width: 38%;
+}
+
+.admin-post-category-column {
+    width: 18%;
+}
+
+.admin-post-status-column {
+    width: 8%;
+}
+
+.admin-post-date-column {
+    width: 13%;
+}
+
+.admin-post-management-column {
+    width: 23%;
+}
+
+.admin-post-title-text {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* 관리 버튼과 날짜는 한 줄을 유지해 제목 길이에 따라 세로로 쪼개지지 않게 한다. */
+.admin-post-table .admin-post-actions {
+    flex-wrap: nowrap;
+}
+
+.admin-post-table .admin-post-actions .btn,
+.admin-post-table td:nth-child(4) {
+    white-space: nowrap;
+}
+
 .admin-post-cards {
     display: none;
 }

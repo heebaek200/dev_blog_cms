@@ -92,6 +92,24 @@ class AdminPostControllerIntegrationTest {
 	}
 
 	@Test
+	@DisplayName("존재하지 않는 카테고리와 태그를 선택하면 작성 Form에 Field Error를 표시한다")
+	void create_missingTaxonomies_returnsFormWithFieldErrors() throws Exception {
+		mockMvc.perform(post("/admin/posts")
+					.session(authenticatedSession())
+					.param("title", "잘못된 분류 입력")
+					.param("content", "잘못된 분류 입력 본문")
+					.param("categoryId", "999")
+					.param("tagIds", "998")
+					.param("status", "DRAFT"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("admin/post-form"))
+				.andExpect(model().attribute("categoryIdError", "선택한 카테고리를 찾을 수 없습니다."))
+				.andExpect(model().attribute("tagIdsError", "선택한 태그를 찾을 수 없습니다."));
+
+		assertThat(postRepository.count()).isZero();
+	}
+
+	@Test
 	@DisplayName("수정 화면은 저장된 게시글 값을 Form에 다시 표시한다")
 	void showEditForm_existingPost_returnsPopulatedForm() throws Exception {
 		Post post = postRepository.saveAndFlush(
@@ -126,6 +144,28 @@ class AdminPostControllerIntegrationTest {
 		Post updatedPost = postRepository.findById(post.getId()).orElseThrow();
 		assertThat(updatedPost.getTitle()).isEqualTo("수정된 글");
 		assertThat(updatedPost.getStatus()).isEqualTo(Post.Status.PUBLISHED);
+	}
+
+	@Test
+	@DisplayName("존재하지 않는 태그를 선택하면 수정 Form에 Field Error를 표시하고 변경하지 않는다")
+	void update_missingTag_returnsFormAndKeepsPost() throws Exception {
+		Post post = postRepository.saveAndFlush(
+				Post.create(null, "기존 글", "기존 글 본문", Post.Status.DRAFT)
+		);
+
+		mockMvc.perform(post("/admin/posts/{postId}/edit", post.getId())
+					.session(authenticatedSession())
+					.param("title", "변경하면 안 되는 제목")
+					.param("content", "변경하면 안 되는 본문")
+					.param("tagIds", "999")
+					.param("status", "PUBLISHED"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("admin/post-form"))
+				.andExpect(model().attribute("tagIdsError", "선택한 태그를 찾을 수 없습니다."));
+
+		Post unchangedPost = postRepository.findById(post.getId()).orElseThrow();
+		assertThat(unchangedPost.getTitle()).isEqualTo("기존 글");
+		assertThat(unchangedPost.getStatus()).isEqualTo(Post.Status.DRAFT);
 	}
 
 	@Test

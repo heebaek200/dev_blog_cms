@@ -116,21 +116,25 @@ public class PostService {
 	 * 검증된 Form 입력으로 게시글을 생성한다.
 	 *
 	 * @param request 게시글 저장 입력
+	 * @return 분류 입력이 유효하여 게시글을 생성했으면 {@code true}, 그렇지 않으면 {@code false}
 	 */
 	@Transactional
-	public void create(PostRequest.Save request) {
-		Category category = findCategory(request.getCategoryId());
-		List<Tag> tags = findTags(request.getTagIds());
+	public boolean create(PostRequest.Save request) {
+		TaxonomySelection taxonomies = findTaxonomies(request);
+		if (!taxonomies.valid()) {
+			return false;
+		}
 		Post post = Post.create(
-				category,
+				taxonomies.category(),
 				request.getTitle(),
 				request.getContent(),
 				request.getStatus()
 		);
-		tags.forEach(post::addTag);
+		taxonomies.tags().forEach(post::addTag);
 
 		Post savedPost = postRepository.save(post);
 		log.info("게시글을 생성했습니다. 게시글 ID={}", savedPost.getId());
+		return true;
 	}
 
 	/**
@@ -138,18 +142,22 @@ public class PostService {
 	 *
 	 * @param postId 게시글 ID
 	 * @param request 게시글 저장 입력
+	 * @return 분류 입력이 유효하여 게시글을 수정했으면 {@code true}, 그렇지 않으면 {@code false}
 	 */
 	@Transactional
-	public void update(Long postId, PostRequest.Save request) {
+	public boolean update(Long postId, PostRequest.Save request) {
 		Post post = postRepository.findDetailById(postId)
 				.orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
-		Category category = findCategory(request.getCategoryId());
-		List<Tag> tags = findTags(request.getTagIds());
+		TaxonomySelection taxonomies = findTaxonomies(request);
+		if (!taxonomies.valid()) {
+			return false;
+		}
 
-		post.update(category, request.getTitle(), request.getContent());
-		post.replaceTags(tags);
+		post.update(taxonomies.category(), request.getTitle(), request.getContent());
+		post.replaceTags(taxonomies.tags());
 		changeStatus(post, request.getStatus());
 		log.info("게시글을 수정했습니다. 게시글 ID={}", postId);
+		return true;
 	}
 
 	/**
@@ -192,30 +200,30 @@ public class PostService {
 	}
 
 	/**
-	 * 선택한 카테고리를 조회하고 미지정이면 null을 반환한다.
+	 * 선택한 카테고리와 태그를 조회하고 존재하지 않는 ID를 Field Error로 기록한다.
 	 *
-	 * @param categoryId 선택한 카테고리 ID
-	 * @return 선택한 카테고리 또는 null
-	 * @throws Exception404 선택한 카테고리가 존재하지 않을 때
+	 * @param request 게시글 저장 입력
+	 * @return 조회한 분류와 입력 유효 여부
 	 */
-	private Category findCategory(Long categoryId) {
-		if (categoryId == null) {
-			return null;
-		}
-		return categoryRepository.findById(categoryId)
-				.orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
-	}
+	private TaxonomySelection findTaxonomies(PostRequest.Save request) {
+		request.setCategoryIdError("");
+		request.setTagIdsError("");
 
-	/**
-	 * 선택한 태그 ID에 해당하는 태그를 입력 순서대로 조회한다.
-	 *
-	 * @param tagIds 선택한 태그 ID 집합
-	 * @return 선택한 태그 목록
-	 * @throws Exception404 선택한 태그 중 존재하지 않는 값이 있을 때
-	 */
-	private List<Tag> findTags(Set<Long> tagIds) {
-		Set<Long> selectedTagIds = tagIds == null ? Set.of() : tagIds;
-		Map<Long, Tag> tagsById = tagRepository.findAllById(selectedTagIds).stream()
+		Category category = null;
+		boolean valid = true;
+		if (request.getCategoryId() != null) {
+			category = categoryRepository.findById(request.getCategoryId()).orElse(null);
+			if (category == null) {
+				request.setCategoryIdError("선택한 카테고리를 찾을 수 없습니다.");
+				valid = false;
+			}
+		}
+
+		Set<Long> selectedTagIds = request.getTagIds() == null ? Set.of() : request.getTagIds();
+		Set<Long> nonNullTagIds = selectedTagIds.stream()
+				.filter(Objects::nonNull)
+				.collect(Collectors.toCollection(LinkedHashSet::new));
+		Map<Long, Tag> tagsById = tagRepository.findAllById(nonNullTagIds).stream()
 				.collect(Collectors.toMap(
 						Tag::getId,
 						tag -> tag,
@@ -223,15 +231,26 @@ public class PostService {
 						LinkedHashMap::new
 				));
 
-		return selectedTagIds.stream()
-				.map(tagId -> {
-					Tag tag = tagsById.get(tagId);
-					if (tag == null) {
-						throw new Exception404("태그를 찾을 수 없습니다.");
-					}
-					return tag;
-				})
+		List<Tag> tags = nonNullTagIds.stream()
+				.map(tagsById::get)
+				.filter(Objects::nonNull)
 				.toList();
+		if (tags.size() != selectedTagIds.size()) {
+			request.setTagIdsError("선택한 태그를 찾을 수 없습니다.");
+			valid = false;
+		}
+
+		return new TaxonomySelection(category, tags, valid);
+	}
+
+	/**
+	 * 게시글 Form에서 선택한 분류 조회 결과를 묶는다.
+	 *
+	 * @param category 선택한 카테고리 또는 null
+	 * @param tags 선택한 태그 목록
+	 * @param valid 모든 분류 ID가 존재하는지 여부
+	 */
+	private record TaxonomySelection(Category category, List<Tag> tags, boolean valid) {
 	}
 
 	/**
