@@ -1,0 +1,84 @@
+/* 확정된 파스텔 주황 Palette와 공통 화면 간격을 와이어프레임에 적용한다. */
+:root {
+  --blog-bg: #fff8f3;
+  --blog-surface: #ffffff;
+  --blog-primary: #efa66f;
+  --blog-primary-strong: #a65324;
+  --blog-primary-soft: #fff0e4;
+  --blog-text: #302824;
+  --blog-muted: #75665e;
+  --blog-success: #3f7d5a;
+  --blog-warning: #a76524;
+  --blog-danger: #b85450;
+  --blog-border: #eadbd1;
+}
+
+/* 읽기 화면과 관리 화면이 동일한 배경과 기본 Typography를 공유하도록 한다. */
+body {
+  min-height: 100vh;
+  color: var(--blog-text);
+  background: var(--blog-bg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+a { color: var(--blog-primary-strong); }
+a:hover { color: #7f3d1d; }
+.site-header { background: rgba(255, 255, 255, 0.96); border-bottom: 1px solid var(--blog-border); }
+.navbar-brand { color: var(--blog-text); font-weight: 750; }
+.nav-link { color: var(--blog-muted); }
+.nav-link.active, .nav-link:hover { color: var(--blog-primary-strong); }
+.page-shell { width: min(100% - 2rem, 960px); margin-inline: auto; }
+.reading-shell { width: min(100% - 2rem, 760px); margin-inline: auto; }
+.page-main { padding-block: 3rem; }
+
+.surface {
+  background: var(--blog-surface);
+  border: 1px solid var(--blog-border);
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(83, 54, 37, 0.06);
+}
+
+.eyebrow { color: var(--blog-primary-strong); font-size: 0.78rem; font-weight: 750; letter-spacing: 0.08em; text-transform: uppercase; }
+.muted { color: var(--blog-muted); }
+.filter-chip, .tag-chip {
+  display: inline-flex;
+  padding: 0.3rem 0.7rem;
+  color: var(--blog-primary-strong);
+  background: var(--blog-primary-soft);
+  border: 1px solid #f5d0b2;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+
+.post-card { padding: 1.5rem; }
+.post-card + .post-card { margin-top: 1rem; }
+.post-card h2 a { color: var(--blog-text); text-decoration: none; }
+.post-card h2 a:hover { color: var(--blog-primary-strong); }
+.btn-primary { --bs-btn-bg: var(--blog-primary-strong); --bs-btn-border-color: var(--blog-primary-strong); --bs-btn-hover-bg: #87431f; --bs-btn-hover-border-color: #87431f; }
+.btn-outline-primary { --bs-btn-color: var(--blog-primary-strong); --bs-btn-border-color: var(--blog-primary-strong); --bs-btn-hover-bg: var(--blog-primary-strong); --bs-btn-hover-border-color: var(--blog-primary-strong); }
+.message-success { color: var(--blog-success); background: #eef8f1; border-color: #bad9c5; }
+.message-warning { color: var(--blog-warning); background: #fff8e9; border-color: #edd4a8; }
+.message-error { color: var(--blog-danger); background: #fff1f0; border-color: #e7bfbd; }
+.status-draft { color: var(--blog-warning); background: #fff3d9; }
+.status-published { color: var(--blog-success); background: #e8f5ec; }
+.status-badge { padding: 0.3rem 0.6rem; border-radius: 999px; font-weight: 700; }
+.article-body { font-size: 1.06rem; line-height: 1.8; }
+.article-body pre { padding: 1rem; overflow-x: auto; color: #f8f2ee; background: #302824; border-radius: 0.75rem; }
+.form-label { font-weight: 650; }
+.form-control:focus, .form-select:focus { border-color: var(--blog-primary); box-shadow: 0 0 0 0.25rem rgba(239, 166, 111, 0.22); }
+.invalid-feedback { color: var(--blog-danger); }
+.empty-state { padding: 4rem 1.5rem; text-align: center; }
+.site-footer { padding-block: 2rem; color: var(--blog-muted); border-top: 1px solid var(--blog-border); }
+.wireframe-note { padding: 0.65rem 1rem; color: var(--blog-muted); background: #f8eee7; border-bottom: 1px dashed #d9bda9; font-size: 0.82rem; }
+
+/* 좁은 화면에서는 관리자 Table 대신 게시글 Card가 보이도록 화면 설계 의도를 나타낸다. */
+@media (max-width: 767.98px) {
+  .page-main { padding-block: 2rem; }
+  .desktop-table { display: none; }
+  .mobile-admin-cards { display: grid; gap: 1rem; }
+}
+
+@media (min-width: 768px) {
+  .mobile-admin-cards { display: none; }
+}
