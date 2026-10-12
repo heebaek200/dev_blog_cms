@@ -128,10 +128,10 @@ HTML Form만으로 동작하도록 변경 요청에도 POST를 사용한다. 성
 
 ## 작성 결과
 
-- [공개 게시글 목록](/docs/design/wireframes/public-post-list.html)
-- [공개 게시글 상세](/docs/design/wireframes/public-post-detail.html)
-- [관리자 로그인](/docs/design/wireframes/admin-login.html)
-- [관리자 게시글 목록](/docs/design/wireframes/admin-post-list.html)
-- [게시글 작성·수정 Form](/docs/design/wireframes/admin-post-form.html)
-- [카테고리·태그 관리](/docs/design/wireframes/admin-taxonomy.html)
-- [404 오류](/docs/design/wireframes/error-404.html)
+- [공개 게시글 목록](https://heebaek200.github.io/dev_blog_cms/design/wireframes/public-post-list.html)
+- [공개 게시글 상세](https://heebaek200.github.io/dev_blog_cms/design/wireframes/public-post-detail.html)
+- [관리자 로그인](https://heebaek200.github.io/dev_blog_cms/design/wireframes/admin-login.html)
+- [관리자 게시글 목록](https://heebaek200.github.io/dev_blog_cms/design/wireframes/admin-post-list.html)
+- [게시글 작성·수정 Form](https://heebaek200.github.io/dev_blog_cms/design/wireframes/admin-post-form.html)
+- [카테고리·태그 관리](https://heebaek200.github.io/dev_blog_cms/design/wireframes/admin-taxonomy.html)
+- [404 오류](https://heebaek200.github.io/dev_blog_cms/design/wireframes/error-404.html)
