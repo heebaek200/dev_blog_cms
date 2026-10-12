@@ -82,7 +82,7 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(RuntimeException.class)
 	public String handleInternalError(RuntimeException exception, HttpServletResponse response, Model model) {
-		log.error("Unhandled application error.", exception);
+		log.error("처리되지 않은 애플리케이션 오류가 발생했습니다.", exception);
 		response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		model.addAttribute("errorTitle", "요청을 처리할 수 없습니다");
 		model.addAttribute("errorMessage", "잠시 후 다시 시도해 주세요.");
