@@ -8,7 +8,7 @@ title: 개인 기술 블로그 CMS
 - [사용자 시나리오 및 업무 규칙](business-rules.md)
 - [데이터베이스 설계서 및 ERD](database-design.md)
 - [화면 설계서](screen-design.md)
-- [화면 와이어프레임](design/wireframes/public-post-list.html)
+- [화면 와이어프레임](/docs/design/wireframes/public-post-list.html)
 - [REST API 설계서](api-design.md)
 - [코드 컨벤션](convention.md)
 - [설계 결정 기록](decision-log.md)
