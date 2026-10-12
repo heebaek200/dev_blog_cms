@@ -54,6 +54,26 @@ class CommonTemplateContractTest {
 	}
 
 	@Test
+	@DisplayName("게시글 관리 화면은 공통 Layout과 Message Component를 사용한다")
+	void postManagementTemplates_renderSharedComponents() throws IOException {
+		String listTemplate = readResource("templates/admin/posts.mustache");
+		String formTemplate = readResource("templates/admin/post-form.mustache");
+
+		assertThat(listTemplate).contains(
+				"{{>layout/header}}",
+				"{{>components/messages}}",
+				"{{>layout/footer}}"
+		);
+		assertThat(formTemplate).contains(
+				"{{>layout/header}}",
+				"{{>components/messages}}",
+				"{{>layout/footer}}"
+		);
+		assertThat(listTemplate).contains("return confirm('게시글을 삭제하시겠습니까?");
+		assertThat(formTemplate).contains("return confirm('게시글을 삭제하시겠습니까?");
+	}
+
+	@Test
 	@DisplayName("공통 Message Component는 성공·경고·오류 상태를 모두 지원한다")
 	void messageComponent_supportsAllConfirmedStates() throws IOException {
 		String messageComponent = readResource("templates/components/messages.mustache");

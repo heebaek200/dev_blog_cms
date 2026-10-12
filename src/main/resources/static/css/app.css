@@ -10,6 +10,8 @@
     --app-success: #3f7d5a;
     --app-warning: #a76524;
     --app-danger: #b85450;
+    --app-border-color: #dee2e6;
+    --app-border-radius: 0.375rem;
 }
 
 /* 긴 글을 읽기 쉬운 단일 열에 배치하고 Footer가 화면 아래에 머물게 한다. */
@@ -103,6 +105,76 @@ body {
 
 .taxonomy-panel .list-group-item {
     background: transparent;
+}
+
+/* 관리자 게시글 목록과 작성 Form을 공통 Surface 위에 배치한다. */
+.admin-surface {
+    background: var(--app-surface);
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 2rem rgb(48 40 36 / 8%);
+}
+
+.admin-post-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.admin-post-cards {
+    display: none;
+}
+
+/* 게시글 공개 상태는 색상과 문구를 함께 사용해 구분한다. */
+.post-status {
+    display: inline-flex;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.post-status-published {
+    color: #285c3e;
+    background: #e5f3e9;
+}
+
+.post-status-draft {
+    color: #6b584d;
+    background: #eee7e2;
+}
+
+/* 긴 본문을 작성할 때 편집 영역의 최소 높이를 유지한다. */
+.post-editor {
+    min-height: 20rem;
+    resize: vertical;
+}
+
+.tag-options {
+    padding: 0.75rem;
+    border: 1px solid var(--app-border-color);
+    border-radius: var(--app-border-radius);
+}
+
+.tag-options-invalid {
+    border-color: var(--app-danger);
+}
+
+.field-error {
+    margin-top: 0.25rem;
+    color: var(--app-danger);
+    font-size: 0.875em;
+}
+
+/* 좁은 화면에서는 관리자 게시글 Table을 카드 목록으로 교체한다. */
+@media (max-width: 767.98px) {
+    .admin-post-table {
+        display: none;
+    }
+
+    .admin-post-cards {
+        display: grid;
+        gap: 1rem;
+    }
 }
 
 /* 모바일에서는 오류 카드의 여백을 줄여 작은 화면에서도 주요 동작을 바로 보이게 한다. */

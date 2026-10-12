@@ -1,6 +1,7 @@
 package fullstack.demoproject.devblogcms.post;
 
 import fullstack.demoproject.devblogcms._core.entity.BaseTimeEntity;
+import fullstack.demoproject.devblogcms._core.exception.InvalidPostStateException;
 import fullstack.demoproject.devblogcms.category.Category;
 import fullstack.demoproject.devblogcms.tag.Tag;
 import jakarta.annotation.Nullable;
@@ -84,6 +85,69 @@ public class Post extends BaseTimeEntity {
             throw new IllegalArgumentException("상태는 필수입력입니다.");
         }
         return new Post(category, title, content, status);
+    }
+
+    /**
+     * 게시글의 카테고리, 제목과 본문을 변경한다.
+     *
+     * @param category 변경할 카테고리
+     * @param title 변경할 제목
+     * @param content 변경할 본문
+     * @throws IllegalArgumentException 제목이나 본문이 유효하지 않을 때
+     */
+    public void update(@Nullable Category category, String title, String content) {
+        title = title == null ? "" : title.strip();
+        if (title.isEmpty() || title.length() > 200) {
+            throw new IllegalArgumentException("제목은 1자 이상 200자 이하여야 합니다.");
+        }
+        content = content == null ? "" : content.strip();
+        if (content.isEmpty()) {
+            throw new IllegalArgumentException("내용은 필수입력입니다.");
+        }
+
+        this.category = category;
+        this.title = title;
+        this.content = content;
+    }
+
+    /**
+     * 초안 게시글을 공개 상태로 전환한다.
+     *
+     * @throws InvalidPostStateException 현재 상태가 초안이 아닐 때
+     */
+    public void publish() {
+        if (status != Status.DRAFT) {
+            throw new InvalidPostStateException();
+        }
+        status = Status.PUBLISHED;
+    }
+
+    /**
+     * 공개 게시글을 초안 상태로 전환한다.
+     *
+     * @throws InvalidPostStateException 현재 상태가 공개가 아닐 때
+     */
+    public void draft() {
+        if (status != Status.PUBLISHED) {
+            throw new InvalidPostStateException();
+        }
+        status = Status.DRAFT;
+    }
+
+    /**
+     * 기존 태그 연결을 제거하고 전달받은 태그 목록으로 다시 연결한다.
+     *
+     * @param tags 새로 연결할 태그 목록
+     * @throws IllegalArgumentException 태그가 5개를 초과할 때
+     */
+    public void replaceTags(List<Tag> tags) {
+        if (tags == null || tags.size() > 5) {
+            throw new IllegalArgumentException("태그는 최대 5개까지 지정할 수 있습니다.");
+        }
+
+        postTags.removeIf(postTag -> tags.stream()
+                .noneMatch(tag -> hasSameIdentity(postTag.getTag(), tag)));
+        tags.forEach(this::addTag);
     }
 
     /**

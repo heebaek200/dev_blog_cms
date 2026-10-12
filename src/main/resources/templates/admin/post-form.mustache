@@ -1,0 +1,106 @@
+{{>layout/header}}
+<nav class="d-flex flex-wrap align-items-center gap-3 mb-4" aria-label="관리자 메뉴">
+    <a class="btn btn-sm app-btn-primary" href="/admin/posts">게시글 관리</a>
+    <a class="btn btn-sm btn-outline-secondary" href="/admin/taxonomies">카테고리·태그</a>
+    <form class="ms-auto" action="/admin/logout" method="post">
+        <button class="btn btn-sm btn-outline-secondary" type="submit">로그아웃</button>
+    </form>
+</nav>
+
+<header class="mb-4">
+    <p class="text-uppercase small fw-semibold mb-2 text-secondary">Editor</p>
+    <h1 class="h2 mb-0">{{formTitle}}</h1>
+</header>
+
+{{>components/messages}}
+
+<section class="admin-surface p-4" aria-label="게시글 작성 Form">
+    <form action="{{formAction}}" method="post" novalidate>
+        <div class="mb-4">
+            <label class="form-label" for="title">제목</label>
+            <input class="form-control{{#hasTitleError}} is-invalid{{/hasTitleError}}"
+                   id="title"
+                   name="title"
+                   value="{{postRequest.title}}"
+                   maxlength="200"
+                   aria-describedby="title-error"
+                   required>
+            {{#hasTitleError}}
+            <div class="invalid-feedback" id="title-error">{{titleError}}</div>
+            {{/hasTitleError}}
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label" for="content">본문</label>
+            <textarea class="form-control post-editor{{#hasContentError}} is-invalid{{/hasContentError}}"
+                      id="content"
+                      name="content"
+                      rows="14"
+                      aria-describedby="content-error content-help"
+                      required>{{postRequest.content}}</textarea>
+            {{#hasContentError}}
+            <div class="invalid-feedback" id="content-error">{{contentError}}</div>
+            {{/hasContentError}}
+            <div class="form-text" id="content-help">초안 상태에서도 제목과 본문은 입력합니다.</div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-5">
+                <label class="form-label" for="category">카테고리</label>
+                <select class="form-select{{#hasCategoryIdError}} is-invalid{{/hasCategoryIdError}}"
+                        id="category"
+                        name="categoryId"
+                        aria-describedby="category-error">
+                    <option value="">미지정</option>
+                    {{#categories}}
+                    <option value="{{id}}"{{#selected}} selected{{/selected}}>{{name}}</option>
+                    {{/categories}}
+                </select>
+                {{#hasCategoryIdError}}
+                <div class="invalid-feedback" id="category-error">{{categoryIdError}}</div>
+                {{/hasCategoryIdError}}
+            </div>
+
+            <fieldset class="col-md-7">
+                <legend class="form-label fs-6">태그 <span class="text-secondary fw-normal">(최대 5개)</span></legend>
+                <div class="tag-options{{#hasTagIdsError}} tag-options-invalid{{/hasTagIdsError}}"
+                     aria-describedby="tag-ids-error">
+                    {{#tags}}
+                    <label class="form-check form-check-inline mb-2">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="tagIds"
+                               value="{{id}}"{{#selected}} checked{{/selected}}>
+                        <span class="form-check-label">{{name}}</span>
+                    </label>
+                    {{/tags}}
+                    {{^tags}}
+                    <span class="text-secondary small">등록된 태그가 없습니다.</span>
+                    {{/tags}}
+                </div>
+                {{#hasTagIdsError}}
+                <div class="field-error" id="tag-ids-error">{{tagIdsError}}</div>
+                {{/hasTagIdsError}}
+            </fieldset>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-end gap-2 border-top pt-4">
+            <a class="btn btn-outline-secondary" href="/admin/posts">취소</a>
+            <button class="btn btn-outline-primary" type="submit" name="status" value="DRAFT">초안 저장</button>
+            <button class="btn app-btn-primary" type="submit" name="status" value="PUBLISHED">공개 저장</button>
+        </div>
+    </form>
+
+    {{#isEdit}}
+    <form class="border-top mt-4 pt-4"
+          action="/admin/posts/{{postId}}/delete"
+          method="post"
+          onsubmit="return confirm('게시글을 삭제하시겠습니까? 삭제한 게시글은 복구할 수 없습니다.');">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <p class="text-secondary small mb-0">삭제한 게시글은 복구할 수 없습니다.</p>
+            <button class="btn btn-outline-danger" type="submit">게시글 삭제</button>
+        </div>
+    </form>
+    {{/isEdit}}
+</section>
+{{>layout/footer}}
