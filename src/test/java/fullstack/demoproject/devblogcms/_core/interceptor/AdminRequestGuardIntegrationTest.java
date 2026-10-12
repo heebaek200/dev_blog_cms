@@ -29,10 +29,10 @@ class AdminRequestGuardIntegrationTest {
 	}
 
 	@Test
-	@DisplayName("로그인 주소는 관리자 Session 검사에서 제외된다")
-	void loginRequest_missingSession_isNotRedirectedByGuard() throws Exception {
+	@DisplayName("로그인 주소는 관리자 Session 검사에서 제외되어 정상 화면을 반환한다")
+	void loginRequest_missingSession_returnsLoginView() throws Exception {
 		mockMvc.perform(get("/admin/login"))
-				.andExpect(status().isNotFound());
+				.andExpect(status().isOk());
 	}
 
 	@Test
