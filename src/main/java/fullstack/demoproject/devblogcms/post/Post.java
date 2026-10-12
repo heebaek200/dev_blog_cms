@@ -5,7 +5,6 @@ import fullstack.demoproject.devblogcms.category.Category;
 import fullstack.demoproject.devblogcms.tag.Tag;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -55,8 +54,7 @@ public class Post extends BaseTimeEntity {
         DRAFT, PUBLISHED
     }
 
-    @Builder
-    public Post(Category category, String title, String content, Status status) {
+    private Post(Category category, String title, String content, Status status) {
         this.category = category;
         this.title = title;
         this.content = content;
@@ -100,7 +98,7 @@ public class Post extends BaseTimeEntity {
             throw new IllegalArgumentException("태그는 필수입니다.");
         }
         boolean alreadyAdded = postTags.stream()
-                .anyMatch(postTag -> postTag.getTag() == tag);
+                .anyMatch(postTag -> hasSameIdentity(postTag.getTag(), tag));
         if (alreadyAdded) {
             return;
         }
@@ -117,7 +115,7 @@ public class Post extends BaseTimeEntity {
      * @param tag 연결을 제거할 태그
      */
     public void removeTag(Tag tag) {
-        postTags.removeIf(postTag -> postTag.getTag() == tag);
+        postTags.removeIf(postTag -> hasSameIdentity(postTag.getTag(), tag));
     }
 
     /**
@@ -127,5 +125,24 @@ public class Post extends BaseTimeEntity {
      */
     public List<PostTag> getPostTags() {
         return Collections.unmodifiableList(postTags);
+    }
+
+    /**
+     * 두 태그가 같은 영속 Entity를 나타내는지 식별자로 비교한다.
+     * 아직 저장되지 않아 식별자가 없으면 동일한 객체인지 비교한다.
+     *
+     * @param existingTag 현재 연결된 태그
+     * @param candidateTag 비교할 태그
+     * @return 같은 태그이면 true
+     */
+    private boolean hasSameIdentity(Tag existingTag, Tag candidateTag) {
+        if (existingTag == candidateTag) {
+            return true;
+        }
+        if (existingTag == null || candidateTag == null
+                || existingTag.getId() == null || candidateTag.getId() == null) {
+            return false;
+        }
+        return existingTag.getId().equals(candidateTag.getId());
     }
 }

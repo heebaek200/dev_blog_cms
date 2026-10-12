@@ -27,7 +27,7 @@ public class Category extends BaseTimeEntity {
     @Column(nullable = false, unique = true, length = 50)
     private String normalizedName;
 
-    public Category(String name, String normalizedName) {
+    private Category(String name, String normalizedName) {
         this.name = name;
         this.normalizedName = normalizedName;
     }

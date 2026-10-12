@@ -24,7 +24,7 @@ public class Tag extends BaseTimeEntity {
     @Column(nullable = false, unique = true, length = 50)
     private String normalizedName;
 
-    public Tag(String name, String normalizedName) {
+    private Tag(String name, String normalizedName) {
         this.name = name;
         this.normalizedName = normalizedName;
     }
