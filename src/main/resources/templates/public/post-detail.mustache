@@ -1,0 +1,21 @@
+{{>layout/header}}
+<div class="public-reading-shell">
+    <article class="public-surface public-post-detail">
+        <header class="mb-5">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                {{#post.category}}<a class="taxonomy-chip" href="{{url}}">{{name}}</a>{{/post.category}}
+                {{^post.category}}<span class="taxonomy-chip taxonomy-chip-static">미분류</span>{{/post.category}}
+                <span class="text-secondary small">{{post.createdAt}}</span>
+            </div>
+            <h1 class="display-5 fw-bold">{{post.title}}</h1>
+            {{#post.hasTags}}
+            <div class="d-flex flex-wrap gap-2 mt-4" aria-label="게시글 태그">
+                {{#post.tags}}<a class="tag-chip" href="{{url}}">#{{name}}</a>{{/post.tags}}
+            </div>
+            {{/post.hasTags}}
+        </header>
+        <div class="public-article-body">{{post.content}}</div>
+    </article>
+    <a class="d-inline-block mt-4" href="/">← 목록으로 돌아가기</a>
+</div>
+{{>layout/footer}}

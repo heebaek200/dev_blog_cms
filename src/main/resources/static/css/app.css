@@ -208,6 +208,85 @@ body {
     font-size: 0.875em;
 }
 
+/* 공개 화면은 긴 본문을 읽기 편한 단일 열과 충분한 행간으로 표시한다. */
+.public-reading-shell {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.public-surface {
+    background: var(--app-surface);
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 2rem rgb(48 40 36 / 8%);
+}
+
+.public-post-card {
+    padding: 1.5rem;
+}
+
+.public-post-detail {
+    padding: clamp(1.5rem, 5vw, 3rem);
+}
+
+.public-post-link {
+    color: var(--app-text);
+    text-decoration: none;
+}
+
+.public-post-link:hover,
+.public-post-link:focus-visible {
+    color: var(--app-primary-strong);
+    text-decoration: underline;
+}
+
+/* 카테고리와 태그 Link는 선택 상태를 색상뿐 아니라 테두리 두께로도 구분한다. */
+.taxonomy-chip,
+.tag-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.7rem;
+    color: var(--app-primary-strong);
+    background: var(--app-primary-soft);
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    line-height: 1.2;
+    text-decoration: none;
+}
+
+.taxonomy-chip:hover,
+.taxonomy-chip:focus-visible,
+.tag-chip:hover,
+.tag-chip:focus-visible,
+.taxonomy-chip-selected,
+.tag-chip-selected {
+    color: var(--app-text);
+    border-color: var(--app-primary-strong);
+}
+
+.taxonomy-chip-static {
+    color: var(--app-muted);
+    background: #f5f1ee;
+}
+
+.public-empty-state {
+    padding: 3rem 1.5rem;
+}
+
+/* 저장된 줄바꿈은 보존하되 긴 문자열과 Code가 본문 열을 벗어나지 않게 한다. */
+.public-article-body {
+    overflow-wrap: anywhere;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    white-space: pre-wrap;
+}
+
+.public-article-body pre,
+.public-article-body code {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
 /* 좁은 화면에서는 관리자 게시글 Table을 카드 목록으로 교체한다. */
 @media (max-width: 767.98px) {
     .admin-post-table {
