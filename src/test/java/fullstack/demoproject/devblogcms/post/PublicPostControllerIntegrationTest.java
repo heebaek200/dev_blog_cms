@@ -51,6 +51,7 @@ class PublicPostControllerIntegrationTest {
 				.andExpect(status().isOk())
 				.andExpect(view().name("public/posts"))
 				.andExpect(model().attribute("publicNavigation", true))
+				.andExpect(content().string(Matchers.containsString("href=\"/admin/login\"")))
 				.andExpect(content().string(Matchers.containsString("공개 게시글")))
 				.andExpect(content().string(Matchers.not(Matchers.containsString("숨겨진 초안"))))
 				.andExpect(content().string(Matchers.containsString("/categories/" + category.getId())))
