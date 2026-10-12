@@ -44,12 +44,12 @@
 
 ## 검증
 
-- Form DTO는 Jakarta Bean Validation과 `@Valid`, `BindingResult`를 사용한다.
+- Form DTO는 입력값과 오류 메시지를 필드로 두고 `validate()` 메서드에서 직접 검증한다.
 - 게시글 제목은 Trim 후 필수·최대 200자, 본문은 Trim 후 필수로 검증한다.
 - 카테고리·태그 이름은 Trim 후 필수·최대 50자로 검증한다.
 - 태그 ID는 `Set<Long>`으로 받고 최대 5개로 제한하며 카테고리 ID는 선택값으로 받는다.
 - 로그인 아이디와 비밀번호는 필수로 검증한다.
-- Form 오류는 Service 호출 전에 입력값과 Field Error를 같은 화면에 반환한다.
+- Controller는 Service 호출 전에 Form DTO의 `validate()`를 호출하고 입력값과 검증 오류를 같은 화면에 반환한다.
 - 상태 전환처럼 Entity 자신만의 규칙은 Entity에서, Repository 조회가 필요한 중복·사용 여부 규칙은 Service에서 검증한다.
 
 ## 관리자 인증과 Session

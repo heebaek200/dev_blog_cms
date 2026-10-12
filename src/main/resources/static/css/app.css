@@ -86,6 +86,14 @@ body {
     line-height: 1;
 }
 
+/* 로그인 Form을 읽기 쉬운 폭으로 제한하고 공통 Surface 스타일을 적용한다. */
+.login-panel {
+    max-width: 460px;
+    background: var(--app-surface);
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 2rem rgb(48 40 36 / 8%);
+}
+
 /* 모바일에서는 오류 카드의 여백을 줄여 작은 화면에서도 주요 동작을 바로 보이게 한다. */
 @media (max-width: 575.98px) {
     .error-panel {
