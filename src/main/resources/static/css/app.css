@@ -1,0 +1,94 @@
+/* 확정된 파스텔 주황 Palette와 공통 화면 폭을 애플리케이션 전체에 적용한다. */
+:root {
+    --app-background: #fff8f3;
+    --app-surface: #ffffff;
+    --app-primary: #efa66f;
+    --app-primary-strong: #a65324;
+    --app-primary-soft: #fff0e4;
+    --app-text: #302824;
+    --app-muted: #75665e;
+    --app-success: #3f7d5a;
+    --app-warning: #a76524;
+    --app-danger: #b85450;
+}
+
+/* 긴 글을 읽기 쉬운 단일 열에 배치하고 Footer가 화면 아래에 머물게 한다. */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: var(--app-text);
+    background: var(--app-background);
+}
+
+.app-container {
+    max-width: 920px;
+}
+
+.app-header,
+.app-footer {
+    background: var(--app-surface);
+}
+
+.app-footer {
+    margin-top: auto;
+    color: var(--app-muted);
+}
+
+.navbar-brand {
+    color: var(--app-primary-strong);
+}
+
+/* 흰색 글자 대신 진한 글자와 테두리를 사용해 밝은 Primary 색상의 대비를 확보한다. */
+.app-btn-primary {
+    color: var(--app-text);
+    background: var(--app-primary);
+    border-color: var(--app-primary-strong);
+}
+
+.app-btn-primary:hover,
+.app-btn-primary:focus-visible {
+    color: var(--app-text);
+    background: #e79559;
+    border-color: var(--app-primary-strong);
+}
+
+/* 상태 Message Box는 같은 구조를 유지하고 의미별 색상만 구분한다. */
+.app-alert {
+    background: var(--app-surface);
+    border-width: 0 0 0 0.3rem;
+}
+
+.app-alert-success {
+    border-color: var(--app-success);
+}
+
+.app-alert-warning {
+    border-color: var(--app-warning);
+}
+
+.app-alert-danger {
+    border-color: var(--app-danger);
+}
+
+.error-panel {
+    max-width: 620px;
+    padding: 3rem 1.5rem;
+    background: var(--app-surface);
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 2rem rgb(48 40 36 / 8%);
+}
+
+.error-code {
+    color: var(--app-primary-strong);
+    font-size: clamp(3rem, 12vw, 6rem);
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* 모바일에서는 오류 카드의 여백을 줄여 작은 화면에서도 주요 동작을 바로 보이게 한다. */
+@media (max-width: 575.98px) {
+    .error-panel {
+        padding: 2rem 1rem;
+    }
+}
