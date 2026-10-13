@@ -1,5 +1,6 @@
 package fullstack.demoproject.devblogcms.post;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -12,10 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import fullstack.demoproject.devblogcms._core.config.Define;
+import fullstack.demoproject.devblogcms.administrator.AdministratorSession;
 import fullstack.demoproject.devblogcms.category.Category;
 import fullstack.demoproject.devblogcms.category.CategoryRepository;
 import fullstack.demoproject.devblogcms.tag.Tag;
@@ -47,15 +52,33 @@ class PublicPostControllerIntegrationTest {
 		savePost(category, "공개 게시글", Post.Status.PUBLISHED, tag);
 		savePost(category, "숨겨진 초안", Post.Status.DRAFT, tag);
 
-		mockMvc.perform(get("/"))
+		MvcResult result = mockMvc.perform(get("/"))
 				.andExpect(status().isOk())
 				.andExpect(view().name("public/posts"))
 				.andExpect(model().attribute("publicNavigation", true))
 				.andExpect(content().string(Matchers.containsString("href=\"/admin/login\"")))
+				.andExpect(content().string(Matchers.not(Matchers.containsString("href=\"/admin/posts\""))))
 				.andExpect(content().string(Matchers.containsString("공개 게시글")))
 				.andExpect(content().string(Matchers.not(Matchers.containsString("숨겨진 초안"))))
 				.andExpect(content().string(Matchers.containsString("/categories/" + category.getId())))
-				.andExpect(content().string(Matchers.containsString("/tags/" + tag.getId())));
+				.andExpect(content().string(Matchers.containsString("/tags/" + tag.getId())))
+				.andReturn();
+
+		assertThat(result.getRequest().getSession(false)).isNull();
+	}
+
+	@Test
+	@DisplayName("로그인한 관리자의 공개 화면에는 관리 화면 Link만 표시한다")
+	void showPosts_authenticatedAdministrator_rendersAdminLinkOnly() throws Exception {
+		MockHttpSession session = new MockHttpSession();
+		session.setAttribute(Define.SESSION_ADMIN, new AdministratorSession(1L, "test-admin"));
+
+		mockMvc.perform(get("/").session(session))
+				.andExpect(status().isOk())
+				.andExpect(model().attribute(Define.SESSION_ADMIN,
+						new AdministratorSession(1L, "test-admin")))
+				.andExpect(content().string(Matchers.containsString("href=\"/admin/posts\"")))
+				.andExpect(content().string(Matchers.not(Matchers.containsString("href=\"/admin/login\""))));
 	}
 
 	@Test

@@ -13,8 +13,5 @@ spring:
     name: devblogcms
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
-  mustache:
-    servlet:
-      expose-session-attributes: true
   jpa:
     open-in-view: false
